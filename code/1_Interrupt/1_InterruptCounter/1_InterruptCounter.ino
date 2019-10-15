@@ -5,9 +5,9 @@ Zumo32U4LCD lcd;
 
 #define PIN_RIGHT_XOR  7
 
-static volatile uint16_t count;
+int count;
   
-static void interrupt()
+void interrupt()
 {
   count += 1;
 }

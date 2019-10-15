@@ -17,7 +17,4 @@ void setup()
 void loop()
 {
   motors.setSpeeds(75, 75);
-  delay(1000);
-  motors.setSpeeds(-75, 75);
-  delay(1500);
 }

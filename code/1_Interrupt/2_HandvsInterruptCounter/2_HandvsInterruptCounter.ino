@@ -43,9 +43,9 @@ void loop()
   lcd.gotoXY(0, 1);
   lcd.print(count_right);
     
-  motors.setSpeeds(75, -75);
-  delay(500);
-  motors.setSpeeds(-75, 75);
-  delay(500);
+//  motors.setSpeeds(75, 75);
+  delay(50);
+//  motors.setSpeeds(-75, -75);
+//  delay(500);
   
 }
