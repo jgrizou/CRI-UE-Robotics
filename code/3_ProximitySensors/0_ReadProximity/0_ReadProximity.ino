@@ -28,10 +28,13 @@ void loop()
   const static uint16_t brightnessLevels[] = { 1, 2, 4, 15, 32, 55, 85, 120 };
   static int nLevels = sizeof(brightnessLevels) /sizeof(uint16_t);
 
+  // Go to the next line
+  lcd.gotoXY(0, 0);
+  
   for (uint8_t i = 0; i < nLevels; i++) {
     Zumo32U4IRPulses::start(Zumo32U4IRPulses::Left, brightnessLevels[i], 420);
     delayMicroseconds(421);
-    lcd.print(digitalRead(FRONT_SENSOR));
+    lcd.print(!digitalRead(FRONT_SENSOR));
     Zumo32U4IRPulses::stop();
   }
 
@@ -41,7 +44,7 @@ void loop()
   for (uint8_t i = 0; i < nLevels; i++) {
     Zumo32U4IRPulses::start(Zumo32U4IRPulses::Right, brightnessLevels[i], 420);
     delayMicroseconds(421);
-    lcd.print(digitalRead(FRONT_SENSOR));
+    lcd.print(!digitalRead(FRONT_SENSOR));
     Zumo32U4IRPulses::stop();
   }
   

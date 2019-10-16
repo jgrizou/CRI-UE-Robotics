@@ -1,13 +1,20 @@
+/* This program show we can control the LED Intensity using the same principle as for motor control
+ *  We toggle the user LED ON and OFF with a pause in between
+ *  Changing the duration of ON and OFF states, changes the light intensity
+ */
+
 #include <Wire.h>
 #include <Zumo32U4.h>
 
 Zumo32U4LCD lcd;
 Zumo32U4ButtonA buttonA;
 
+// See https://www.pololu.com/docs/0J63/3.2 for LED PIN description
 #define YELLOW_LED  13
 
 void setup()
 {
+  // Set LED PIN as OUTPUT
   pinMode(YELLOW_LED, OUTPUT);
 
   lcd.clear();
@@ -19,10 +26,19 @@ void setup()
 
 void loop()
 {
+  // Turn LED ON
   digitalWrite(YELLOW_LED, HIGH);
-  delay(1000);
-  digitalWrite(YELLOW_LED, LOW);
-  delay(1000);  
+  
+  // Wait
+  delayMicroseconds(1);
 
-//  delayMicroseconds(1);
+  // Turn LED OFF
+  digitalWrite(YELLOW_LED, LOW);
+
+  // Wait
+  // Try playing with the values of each delays independently, e.g. delayMicroseconds(100) below. 
+  // What will happen and why?
+  delayMicroseconds(1);
+
+  // As for the motor exemple, doing something else that us timeconsuming in the loop will change the brightness of the LED
 }
