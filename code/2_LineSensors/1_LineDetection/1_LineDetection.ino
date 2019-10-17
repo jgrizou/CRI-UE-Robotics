@@ -1,51 +1,57 @@
+/* This program converts line sensors values to boolean valuessayign if there is a line below each sensors
+ *  
+ * We simply define a threshold of 500: 
+ * - if the value is below, then it is WHITE, there is no line
+ * - else, then it is BLACK, there is a line
+ *  
+ * WARNING: You need to place the jumper on the bottom PCB on the DN4 and DN2 position.
+ * See https://www.pololu.com/docs/0J63/3.5
+ * 
+ * We use the library Zumo32U4LineSensors
+ * See https://pololu.github.io/zumo-32u4-arduino-library/class_zumo32_u4_line_sensors.html
+ */
+ 
+ 
 #include <Wire.h>
 #include <Zumo32U4.h>
 
-Zumo32U4LineSensors lineSensors;
-Zumo32U4Motors motors;
-Zumo32U4ButtonA buttonA;
 Zumo32U4LCD lcd;
+Zumo32U4LineSensors lineSensors;
 
+// same as before, we define list to store the values of each sensors
 #define NUM_SENSORS 5
-int lineSensorValues[NUM_SENSORS];
-bool lineDetected[NUM_SENSORS];
+int lineSensorValues[NUM_SENSORS];  // for raw sensor values
+
+int lineDetectionThreshold = 500;  // our threshold that we decided from observation
+bool lineDetected[NUM_SENSORS];   // for boolean values, line or not line
 
 int lastSampleTime = 0;
-int maxSpeed = 100;
 
 void setup()
 {
+  // init sensors
   lineSensors.initFiveSensors();
-
-  // Wait for button A to be pressed and released.
-  lcd.clear();
-  lcd.print(F("Press A"));
-  lcd.gotoXY(0, 1);
-  lcd.print(F("to start"));
-  buttonA.waitForButton();
 }
 
 void loop()
 {
+   // read sensors with emitters on
   lineSensors.read(lineSensorValues, QTR_EMITTERS_ON);
 
+
+  // for each index in the list lineSensorValues
+  // that is from 0 to 4  (NUM_SENSORS = 5 and we use the < operator)
   for (int i = 0; i < NUM_SENSORS; i++) {
 
-    if (lineSensorValues[i] > 500) {
+    // if above threshold, then there is a line
+    // else no line
+    if (lineSensorValues[i] > lineDetectionThreshold) {
       lineDetected[i] = true;
     } else {
       lineDetected[i] = false;
     }
   } 
 
-  if ((int)(millis() - lastSampleTime) >= 100)
-  {
-    lastSampleTime = millis();
-    
-    lcd.clear();
-    for (int i = 0; i < NUM_SENSORS; i++) {
-      lcd.print(lineDetected[i]);
-    }
-  }
+
 
 }

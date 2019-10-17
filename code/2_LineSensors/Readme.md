@@ -1,3 +1,0 @@
-## Line Following
-
-Jumper problem

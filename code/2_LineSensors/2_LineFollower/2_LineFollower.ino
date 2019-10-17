@@ -1,30 +1,41 @@
-/* This example uses the line sensors on the Zumo 32U4 to follow
-a black line on a white background, using a PID-based algorithm.
-It works decently on courses with smooth, 6" radius curves and
-has been tested with Zumos using 75:1 HP motors.  Modifications
-might be required for it to work well on different courses or
-with different motors.
-
-This demo requires a Zumo 32U4 Front Sensor Array to be
-connected, and jumpers on the front sensor array must be
-installed in order to connect pin 4 to DN4 and pin 20 to DN2. */
+/* This program uses the line detected information to follow the line
+ *  
+ *  The ligical is as follows:
+ *  - if the line is centered according tot he robot, go straight
+ *  - if the line is a bit on the right, turn right
+ *  - if the line is a bit on the left, turn left
+ *  
+ * WARNING: You need to place the jumper on the bottom PCB on the DN4 and DN2 position.
+ * See https://www.pololu.com/docs/0J63/3.5
+ * 
+ * We use the library Zumo32U4LineSensors
+ * See https://pololu.github.io/zumo-32u4-arduino-library/class_zumo32_u4_line_sensors.html
+ */
 
 #include <Wire.h>
 #include <Zumo32U4.h>
 
-Zumo32U4LineSensors lineSensors;
-Zumo32U4Motors motors;
-Zumo32U4ButtonA buttonA;
+
 Zumo32U4LCD lcd;
+Zumo32U4ButtonA buttonA;
+Zumo32U4Motors motors;
+Zumo32U4LineSensors lineSensors;
 
 #define NUM_SENSORS 5
 int lineSensorValues[NUM_SENSORS];
+
+int lineDetectionThreshold = 500;
 bool lineDetected[NUM_SENSORS];
 
-int maxSpeed = 150;
+// default speed of the motors
+//useful when debugging you can make it slow to understand the behavior better
+int motorSpeed = 200; 
+
+int lastSampleTime = 0;
 
 void setup()
 {
+  // init sensors
   lineSensors.initFiveSensors();
 
   // Wait for button A to be pressed and released.
@@ -33,51 +44,47 @@ void setup()
   lcd.gotoXY(0, 1);
   lcd.print(F("to start"));
   buttonA.waitForButton();
+  lcd.clear();
 }
 
 void loop()
 {
-  // Get the position of the line.  Note that we *must* provide
-  // the "lineSensorValues" argument to readLine() here, even
-  // though we are not interested in the individual sensor
-  // readings.
+  // read sensors
   lineSensors.read(lineSensorValues, QTR_EMITTERS_ON);
 
+  // convert to boolean, line or no line
   for (int i = 0; i < NUM_SENSORS; i++) {
-
-    if (lineSensorValues[i] > 500) {
+    if (lineSensorValues[i] > lineDetectionThreshold) {
       lineDetected[i] = true;
     } else {
       lineDetected[i] = false;
     }
   } 
 
-  static int lastSampleTime = 0;
-
-  if ((millis() - lastSampleTime) >= 100)
-  {
-    lastSampleTime = millis();
-    
-    lcd.clear();
-    for (int i = 0; i < NUM_SENSORS; i++) {
-      lcd.print(lineDetected[i]);
-    }
+  // we print 0 if there is not line, 1 if a line, for each sensor in order
+  lcd.gotoXY(0,0);
+  for (int i = 0; i < NUM_SENSORS; i++) {
+    lcd.print(lineDetected[i]);
   }
 
+  // the feedback control starts here
+
+  // if the middle sensor is activated
   if (lineDetected[2]) {
-    // line in the middle, go straight
-    motors.setSpeeds(maxSpeed, maxSpeed);
+    // go straight
+    motors.setSpeeds(motorSpeed, motorSpeed);
 
   } else {
+    // middle sensor not activated
 
+    // and left sensor activated
     if (lineDetected[1]) {
-      // line showing on the left
-      motors.setSpeeds(-maxSpeed, maxSpeed);
+      // turn left
+      motors.setSpeeds(-motorSpeed, motorSpeed);
     } else if (lineDetected[3]) {
-      // line showing on the right
-      motors.setSpeeds(maxSpeed, -maxSpeed);
+      // and right sensor activated
+      // turn right
+      motors.setSpeeds(motorSpeed, -motorSpeed);
     }
-    
   }
-
 }
