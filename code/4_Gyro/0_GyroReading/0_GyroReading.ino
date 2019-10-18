@@ -1,3 +1,13 @@
+/* This program read the values from the gyroscope
+ *  
+ *  The gyroscope measure the speed of rotation
+ * 
+ *  Some info are here: https://www.pololu.com/docs/0J63/3.7
+ *  But I mostly looked and cherry picked code from the library
+ *  https://github.com/pololu/zumo-32u4-arduino-library/blob/master/L3G.cpp
+ * 
+ */
+
 #include <Wire.h>
 #include <Zumo32U4.h>
 
@@ -8,8 +18,12 @@ L3G gyro;
 
 void setup()
 {
+  // some intitializtaion to communicate with the gyro
   Wire.begin();
   gyro.init();
+
+  // setting up some registers 
+  //to make the values more stable by applying filters
   // 800 Hz output data rate,
   // low-pass filter cutoff 100 Hz
   gyro.writeReg(L3G::CTRL1, 0b11111111);
@@ -22,9 +36,13 @@ void setup()
 
 void loop()
 {
+  // this read values from the gyro
   gyro.read();
-  
+
+  // we print 
   lcd.clear();
-  lcd.print(gyro.g.z);
+  lcd.print(gyro.g.z); // z axis is pointing up from the robot
+
+  // and wait a bit
   delay(100);
 }
